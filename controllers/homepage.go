@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"posterr/database/entity"
 	"posterr/repository"
 	"posterr/services/post"
 	"strconv"
@@ -62,13 +61,25 @@ func GetPosts(postRepository repository.PostRepositoryInterface, userRepository 
 
 func InsertPost(postRepository repository.PostRepositoryInterface, userRepository repository.UserRepositoryInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var postData entity.Post
-		c.BindJSON(&postData)
+		postData := struct {
+			Content   string
+			Repost    uint64
+			QuotePost uint64
+		}{}
+		err := c.BindJSON(&postData)
+		if err != nil {
+			c.JSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
+			return
+		}
 		userUiid := c.Request.Header["Authorization"][0]
 
 		postService := post.NewPost(postRepository, userRepository)
-		postService.Insert(userUiid, postData)
+		insertErr := postService.Insert(userUiid, postData.Content, postData.Repost, postData.QuotePost)
+		if insertErr != nil {
+			c.JSON(http.StatusNotAcceptable, gin.H{"message": insertErr.Error()})
+			return
+		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "pong"})
+		c.JSON(http.StatusOK, gin.H{"message": "Success"})
 	}
 }
