@@ -8,15 +8,51 @@ import (
 )
 
 type PostRepositoryInterface interface {
+	Get(userID uint64, owner string, page uint64, pageSize uint64, startDateFormated *time.Time, endDateFormated *time.Time) []entity.Post
 	Find(postID uint64) *entity.Post
 	Insert(post entity.Post) error
 	CurrentDayTotalPosts(userID uint64) int64
+	CountUserTotalPosts(userID uint64) uint64
 	CheckUniqueRepost(postID uint64) bool
 	CheckUniqueQuotes(postID uint64) bool
 }
 
 type postRepositoryStruct struct {
 	DbConn *gorm.DB
+}
+
+func (p *postRepositoryStruct) Get(userID uint64, owner string, page uint64, pageSize uint64, startDateFormated *time.Time, endDateFormated *time.Time) []entity.Post {
+	offset := int((page - 1) * pageSize)
+	var posts []entity.Post
+	query := p.DbConn.Model(&entity.Post{})
+	if owner == "user" {
+		query.Where("user_id = ?", userID)
+	}
+	if startDateFormated != nil {
+		startDate := startDateFormated.Format("2006-01-02 15:04:05")
+		query.Where("created_at >= ?", startDate)
+	}
+	if endDateFormated != nil {
+		endDate := endDateFormated.Format("2006-01-02 15:04:05")
+		query.Where("created_at <= ?", endDate)
+	}
+	query.Offset(offset).Limit(int(pageSize)).Find(&posts)
+
+	for index, post := range posts {
+		if post.RepostID != nil {
+			var repost entity.Post
+			p.DbConn.Model(&entity.Post{}).Where("id = ?", post.RepostID).First(&repost)
+			posts[index].Repost = &repost
+		}
+
+		if post.QuoteID != nil {
+			var quote entity.Post
+			p.DbConn.Model(&entity.Post{}).Where("id = ?", post.QuoteID).First(&quote)
+			posts[index].Quote = &quote
+		}
+	}
+
+	return posts
 }
 
 func (p *postRepositoryStruct) Find(postID uint64) *entity.Post {
@@ -61,4 +97,11 @@ func (p *postRepositoryStruct) Insert(post entity.Post) error {
 	}
 
 	return nil
+}
+
+func (p *postRepositoryStruct) CountUserTotalPosts(userID uint64) uint64 {
+	var count int64
+	p.DbConn.Model(&entity.Post{}).Where("user_id = ?", userID).Count(&count)
+
+	return uint64(count)
 }

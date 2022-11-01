@@ -7,7 +7,7 @@ import (
 )
 
 type UserRepositoryInterface interface {
-	GetUserData(userUuid string) (entity.User, error)
+	GetUserData(userUuid string) entity.User
 }
 
 type userRepositoryStruct struct {
@@ -18,10 +18,10 @@ func NewUserRepository(dbConn *gorm.DB) UserRepositoryInterface {
 	return &userRepositoryStruct{DbConn: dbConn}
 }
 
-func (p *userRepositoryStruct) GetUserData(userUuid string) (entity.User, error) {
+func (p *userRepositoryStruct) GetUserData(userUuid string) entity.User {
 	userSearch := entity.User{Uuid: userUuid}
 
 	p.DbConn.First(&userSearch)
 
-	return userSearch, nil
+	return userSearch
 }
