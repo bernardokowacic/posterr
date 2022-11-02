@@ -8,11 +8,8 @@ import (
 	"posterr/services/post"
 	"posterr/services/user"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
-
-var router = gin.Default()
 
 func init() {
 	err := godotenv.Load()
@@ -35,6 +32,6 @@ func main() {
 	postService := post.NewService(postRepository, userRepository)
 	userService := user.NewService(postRepository, userRepository)
 
-	routes.GetRoutes(router, postService, userService)
-	router.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	router := routes.StartAPI(postService, userService)
+	router.Run()
 }
