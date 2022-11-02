@@ -35,7 +35,6 @@ func TestGetUserRoute(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	// assert.Equal(t, "pong", w.Body.String())
 }
 
 func TestGetUserRouteWithError(t *testing.T) {
@@ -51,7 +50,6 @@ func TestGetUserRouteWithError(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	// assert.Equal(t, "pong", w.Body.String())
 }
 
 func TestGetUserRouteWithoutAuthorization(t *testing.T) {
@@ -62,5 +60,4 @@ func TestGetUserRouteWithoutAuthorization(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
-	// assert.Equal(t, "pong", w.Body.String())
 }
