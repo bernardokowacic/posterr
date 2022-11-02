@@ -8,20 +8,20 @@ import (
 )
 
 type PostRepositoryInterface interface {
-	Get(userID uint64, owner string, page uint64, pageSize uint64, startDateFormated *time.Time, endDateFormated *time.Time) []entity.Post
-	Find(postID uint64) *entity.Post
+	Get(userID uint64, owner string, page uint64, pageSize uint64, startDateFormated *time.Time, endDateFormated *time.Time) ([]entity.Post, error)
+	Find(postID uint64) (entity.Post, error)
 	Insert(post entity.Post) error
-	CurrentDayTotalPosts(userID uint64) int64
-	CountUserTotalPosts(userID uint64) uint64
-	CheckUniqueRepost(postID uint64) bool
-	CheckUniqueQuotes(postID uint64) bool
+	CurrentDayTotalPosts(userID uint64) (int64, error)
+	CountUserTotalPosts(userID uint64) (uint64, error)
+	CheckUniqueRepost(postID uint64) (bool, error)
+	CheckUniqueQuotes(postID uint64) (bool, error)
 }
 
 type postRepositoryStruct struct {
 	DbConn *gorm.DB
 }
 
-func (p *postRepositoryStruct) Get(userID uint64, owner string, page uint64, pageSize uint64, startDateFormated *time.Time, endDateFormated *time.Time) []entity.Post {
+func (p *postRepositoryStruct) Get(userID uint64, owner string, page uint64, pageSize uint64, startDateFormated *time.Time, endDateFormated *time.Time) ([]entity.Post, error) {
 	offset := int((page - 1) * pageSize)
 	var posts []entity.Post
 	query := p.DbConn.Model(&entity.Post{})
@@ -36,7 +36,10 @@ func (p *postRepositoryStruct) Get(userID uint64, owner string, page uint64, pag
 		endDate := endDateFormated.Format("2006-01-02 15:04:05")
 		query.Where("created_at <= ?", endDate)
 	}
-	query.Offset(offset).Limit(int(pageSize)).Find(&posts)
+	err := query.Offset(offset).Limit(int(pageSize)).Find(&posts).Error
+	if err != nil {
+		return nil, err
+	}
 
 	for index, post := range posts {
 		if post.RepostID != nil {
@@ -52,42 +55,52 @@ func (p *postRepositoryStruct) Get(userID uint64, owner string, page uint64, pag
 		}
 	}
 
-	return posts
+	return posts, nil
 }
 
-func (p *postRepositoryStruct) Find(postID uint64) *entity.Post {
+func (p *postRepositoryStruct) Find(postID uint64) (entity.Post, error) {
 	var post entity.Post
-	p.DbConn.Model(&entity.Post{}).Where("id = ?", postID).First(&post)
-	if post.ID == 0 {
-		return nil
+	err := p.DbConn.Model(&entity.Post{}).Where("id = ?", postID).First(&post).Error
+	if err != nil {
+		return post, err
 	}
-	return &post
+
+	return post, nil
 }
 
 func NewPostRepository(dbConn *gorm.DB) PostRepositoryInterface {
 	return &postRepositoryStruct{DbConn: dbConn}
 }
 
-func (p *postRepositoryStruct) CurrentDayTotalPosts(userID uint64) int64 {
+func (p *postRepositoryStruct) CurrentDayTotalPosts(userID uint64) (int64, error) {
 	currentDate := time.Now().Format("2006-01-02")
 	var count int64
-	p.DbConn.Model(&entity.Post{}).Where("date(created_at) = ? AND user_id = ?", currentDate, userID).Count(&count)
+	err := p.DbConn.Model(&entity.Post{}).Where("date(created_at) = ? AND user_id = ?", currentDate, userID).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
 
-	return count
+	return count, nil
 }
 
-func (p *postRepositoryStruct) CheckUniqueRepost(postID uint64) bool {
+func (p *postRepositoryStruct) CheckUniqueRepost(postID uint64) (bool, error) {
 	var count int64
-	p.DbConn.Model(&entity.Post{}).Where("id = ? AND repost_id is null", postID).Count(&count)
+	err := p.DbConn.Model(&entity.Post{}).Where("id = ? AND repost_id is null", postID).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
 
-	return count > 0
+	return count > 0, nil
 }
 
-func (p *postRepositoryStruct) CheckUniqueQuotes(postID uint64) bool {
+func (p *postRepositoryStruct) CheckUniqueQuotes(postID uint64) (bool, error) {
 	var count int64
-	p.DbConn.Model(&entity.Post{}).Where("id = ? AND quote_id = 0", postID).Count(&count)
+	err := p.DbConn.Model(&entity.Post{}).Where("id = ? AND quote_id = 0", postID).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
 
-	return count > 0
+	return count > 0, nil
 }
 
 func (p *postRepositoryStruct) Insert(post entity.Post) error {
@@ -99,9 +112,12 @@ func (p *postRepositoryStruct) Insert(post entity.Post) error {
 	return nil
 }
 
-func (p *postRepositoryStruct) CountUserTotalPosts(userID uint64) uint64 {
+func (p *postRepositoryStruct) CountUserTotalPosts(userID uint64) (uint64, error) {
 	var count int64
-	p.DbConn.Model(&entity.Post{}).Where("user_id = ?", userID).Count(&count)
+	err := p.DbConn.Model(&entity.Post{}).Where("user_id = ?", userID).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
 
-	return uint64(count)
+	return uint64(count), nil
 }
