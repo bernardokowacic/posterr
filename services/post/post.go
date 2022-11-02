@@ -67,7 +67,7 @@ func (p *postService) Insert(userUuid string, content string, repostID uint64, q
 		repost = &repostID
 	}
 	if quotePostID != 0 {
-		uniqueQuote, err := p.PostRepository.CheckUniqueQuotes(repostID)
+		uniqueQuote, err := p.PostRepository.CheckUniqueQuotes(quotePostID)
 		if err != nil {
 			return err
 		}
