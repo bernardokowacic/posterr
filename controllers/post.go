@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"posterr/repository"
 	"posterr/services/post"
 	"strconv"
 	"time"
@@ -10,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetPosts(postRepository repository.PostRepositoryInterface, userRepository repository.UserRepositoryInterface) gin.HandlerFunc {
+func GetPosts(postService post.PostServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := struct {
 			Authorization *string `header:"Authorization" binding:"required"`
@@ -67,7 +66,6 @@ func GetPosts(postRepository repository.PostRepositoryInterface, userRepository 
 			return
 		}
 
-		postService := post.NewPost(postRepository, userRepository)
 		posts, err := postService.Index(*header.Authorization, owner, pageNumber, pageSizeNumber, startDateFormated, endDateFormated)
 		if err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
@@ -78,7 +76,7 @@ func GetPosts(postRepository repository.PostRepositoryInterface, userRepository 
 	}
 }
 
-func InsertPost(postRepository repository.PostRepositoryInterface, userRepository repository.UserRepositoryInterface) gin.HandlerFunc {
+func InsertPost(postService post.PostServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := struct {
 			Authorization *string `header:"Authorization" binding:"required"`
@@ -99,7 +97,6 @@ func InsertPost(postRepository repository.PostRepositoryInterface, userRepositor
 			return
 		}
 
-		postService := post.NewPost(postRepository, userRepository)
 		insertErr := postService.Insert(*header.Authorization, postData.Content, postData.Repost, postData.QuotePost)
 		if insertErr != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{"message": insertErr.Error()})
