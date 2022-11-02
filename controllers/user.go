@@ -2,13 +2,12 @@ package controllers
 
 import (
 	"net/http"
-	"posterr/repository"
 	"posterr/services/user"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetUser(postRepository repository.PostRepositoryInterface, userRepository repository.UserRepositoryInterface) gin.HandlerFunc {
+func GetUser(userService user.UserServiceInteface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := struct {
 			Authorization *string `header:"Authorization" binding:"required"`
@@ -18,8 +17,11 @@ func GetUser(postRepository repository.PostRepositoryInterface, userRepository r
 			return
 		}
 
-		userService := user.NewUser(postRepository, userRepository)
-		user := userService.Find(*header.Authorization)
+		user, err := userService.Find(*header.Authorization)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
 
 		c.JSON(http.StatusOK, user)
 	}
