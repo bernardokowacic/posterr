@@ -87,11 +87,11 @@ func InsertPost(postService post.PostServiceInterface) gin.HandlerFunc {
 		}
 
 		postData := struct {
-			Content   string
-			Repost    uint64
-			QuotePost uint64
+			Content   string `binding:"required"`
+			Repost    uint64 `binding:"required"`
+			QuotePost uint64 `binding:"required"`
 		}{}
-		err := c.BindJSON(&postData)
+		err := c.ShouldBindJSON(&postData)
 		if err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
 			return
