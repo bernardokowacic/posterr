@@ -11,7 +11,7 @@ To run this application you need to have the following tools installed on your m
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
 ## Running Posterr
-Right now the project runs with docker-compose, so to execute the project you must run the command `docker-compose start` in your terminal inside the project folder. It will start the API in port 8080 and the database in port 5432.
+Right now the project runs with docker-compose, so to execute the project you must run the command `docker-compose up` in your terminal inside the project folder. It will start the API in port 8080 and the database in port 5432.
 
 # Critique
 ## ToDo
