@@ -1,0 +1,113 @@
+{
+	"info": {
+		"_postman_id": "2a226f3d-e542-4fda-adf1-888bc1df7e94",
+		"name": "posterr",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6221780"
+	},
+	"item": [
+		{
+			"name": "Insert Post",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "53d83955-16f0-445a-bfe6-a431c1789994",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\": \"55555\",\r\n    \"quote\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/post",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get posts",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "53d83955-16f0-445a-bfe6-a431c1789994",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/posts?owner=all&page=0&page_size=10&start_date=2022-10-30 00:21:00&end_date=2022-10-30 00:24:00",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"posts"
+					],
+					"query": [
+						{
+							"key": "owner",
+							"value": "all"
+						},
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "page_size",
+							"value": "10"
+						},
+						{
+							"key": "start_date",
+							"value": "2022-10-30 00:21:00"
+						},
+						{
+							"key": "end_date",
+							"value": "2022-10-30 00:24:00"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "53d83955-16f0-445a-bfe6-a431c1789994",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/user",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
