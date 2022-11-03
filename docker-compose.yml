@@ -1,19 +1,14 @@
 version: "2"
 services:
   app:
-    image: golang
+    build: .
     restart: always
-    working_dir: /var/app
-    volumes:
-      - .:/var/app
     ports:
-      - 8001:8000
+      - 8080:8080
     depends_on:
       - database
     networks:
       - default
-    environment:
-      - "POSTGRES_PASSWORD=123456"
   database:
     image: postgres
     restart: always
